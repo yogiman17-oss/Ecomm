@@ -42,7 +42,8 @@ targets:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/prod
     variables:
       schema: ecommerce_prod
-      schedule_pause_status: UNPAUSED
+      # Paused until prod reads real source data instead of regenerated synthetic data.
+      schedule_pause_status: PAUSED
     permissions:
       - level: CAN_MANAGE
         user_name: ${workspace.current_user.userName}
