@@ -1,0 +1,40 @@
+# CI/CD job: unit tests -> synthetic data -> medallion pipeline -> integration tests.
+# A failing unit test stops the run before any data is written; a failing integration test fails the run.
+resources:
+  jobs:
+    ecommerce_cicd:
+      name: ecommerce_cicd_job
+      max_concurrent_runs: 1
+      schedule:
+        quartz_cron_expression: '0 0 6 * * ?'
+        timezone_id: Asia/Kolkata
+        pause_status: ${var.schedule_pause_status}
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${resources.schemas.ecommerce.name}
+        - name: volume
+          default: ${resources.volumes.raw_data.name}
+      tasks:
+        - task_key: unit_tests
+          notebook_task:
+            notebook_path: ../tests/run_unit_tests.ipynb
+
+        - task_key: generate_synthetic_data
+          depends_on:
+            - task_key: unit_tests
+          notebook_task:
+            notebook_path: ../src/notebooks/generate_synthetic_data.ipynb
+
+        - task_key: run_medallion_pipeline
+          depends_on:
+            - task_key: generate_synthetic_data
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.ecommerce_medallion.id}
+
+        - task_key: integration_tests
+          depends_on:
+            - task_key: run_medallion_pipeline
+          notebook_task:
+            notebook_path: ../tests/integration/integration_tests.ipynb

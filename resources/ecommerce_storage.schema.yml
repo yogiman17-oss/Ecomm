@@ -1,0 +1,7 @@
+# Schema that holds the raw volume and every medallion table.
+resources:
+  schemas:
+    ecommerce:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: Ecommerce medallion (bronze/silver/gold) datasets managed by the ecommerce_sdp_cicd bundle.

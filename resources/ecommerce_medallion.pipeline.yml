@@ -1,0 +1,16 @@
+# Lakeflow Spark Declarative Pipeline: bronze -> silver -> gold materialized views.
+resources:
+  pipelines:
+    ecommerce_medallion:
+      name: ecommerce_medallion_pipeline
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.ecommerce.name}
+      root_path: ../src/pipeline
+      libraries:
+        - glob:
+            include: ../src/pipeline/transformations/**
+      serverless: true
+      channel: CURRENT
+      continuous: false
+      configuration:
+        raw_data_path: /Volumes/${var.catalog}/${resources.schemas.ecommerce.name}/${resources.volumes.raw_data.name}
